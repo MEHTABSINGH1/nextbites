@@ -1,3 +1,17 @@
+.link {
+  display: flex;
+  border-radius: 14px;
+}
+
+.link:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.link .card {
+  flex: 1;
+}
+
 .card {
   display: flex;
   flex-direction: column;
