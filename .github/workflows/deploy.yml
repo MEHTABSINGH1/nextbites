@@ -1,0 +1,79 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, polish-and-deploy]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; don't cancel one that's already running.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+        env:
+          # Site is served from https://<user>.github.io/nextbites/
+          PAGES_BASE_PATH: /nextbites
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Post-deploy check: proves the live site serves the home page, a recipe
+  # page and its CSS, and returns 404 for an unknown recipe id.
+  smoke-test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    env:
+      SITE: https://mehtabsingh1.github.io/nextbites
+    steps:
+      - name: Check live pages
+        run: |
+          set -euo pipefail
+          check() { # url expected-status expected-text
+            for i in 1 2 3 4 5 6; do
+              code=$(curl -s -o page.html -w '%{http_code}' "$1")
+              if [ "$code" = "$2" ] && grep -q "$3" page.html; then
+                echo "OK  $code  $1  (found: $3)"; return 0
+              fi
+              sleep 10 # Pages CDN can lag a few seconds behind the deploy
+            done
+            echo "FAIL $code $1 (expected $2 + '$3')"; exit 1
+          }
+          check "$SITE/"                          200 "<title>NextBites · Find your next favourite recipe</title>"
+          check "$SITE/recipe/miso-ramen/"        200 "<title>Miso Ramen · NextBites</title>"
+          check "$SITE/recipe/does-not-exist/"    404 "Back to all recipes"
+          css=$(curl -s "$SITE/" | grep -oE '/nextbites/_next/static/[^"]+\.css' | head -1)
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://mehtabsingh1.github.io$css")
+          echo "CSS $code $css"; [ "$code" = 200 ]

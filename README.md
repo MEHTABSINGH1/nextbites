@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextBites
 
-## Getting Started
+A small recipe site built with the Next.js App Router. You can search recipes by dish or cuisine and open any recipe for its ingredients and steps.
 
-First, run the development server:
+**Live site:** https://mehtabsingh1.github.io/nextbites/
+
+| Page | Live URL |
+| --- | --- |
+| Home | https://mehtabsingh1.github.io/nextbites/ |
+| Recipe detail | https://mehtabsingh1.github.io/nextbites/recipe/miso-ramen/ |
+| Unknown recipe (not-found page) | https://mehtabsingh1.github.io/nextbites/recipe/does-not-exist/ |
+
+## Features
+
+- **Search:** filter the recipe grid by name or cuisine. Shows an empty state when nothing matches.
+- **Recipe pages:** `app/recipe/[id]/page.tsx` is pre-built for every recipe through `generateStaticParams`.
+- **Graceful states:**
+  - `app/loading.tsx` shows a skeleton while a page loads.
+  - `app/not-found.tsx` is a friendly 404 with a link back home. Unknown recipe ids call `notFound()`.
+  - `app/error.tsx` is a client error boundary with a **Try again** button that calls `reset()`.
+- **Metadata:** `app/layout.tsx` exports a title template and description, so tabs read e.g. "Miso Ramen · NextBites".
+
+## Run locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev     # http://localhost:3000
+npm run build   # static export into ./out
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`next.config.ts` sets `output: "export"` and `trailingSlash: true`. The GitHub Actions workflow in `.github/workflows/deploy.yml` sets `basePath` to `/nextbites` through `PAGES_BASE_PATH`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+On each push, the workflow runs three jobs:
 
-## Learn More
+1. **build**: `npm ci` and `npm run build`, then uploads `./out`.
+2. **deploy**: publishes the upload to GitHub Pages.
+3. **smoke-test**: fetches the live site. The job fails unless the home page and `/recipe/miso-ramen/` return 200 with the expected `<title>`, the stylesheet loads, and `/recipe/does-not-exist/` returns 404 with the not-found page.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+You can read the logs for every run in the repo's [Actions tab](https://github.com/MEHTABSINGH1/nextbites/actions).

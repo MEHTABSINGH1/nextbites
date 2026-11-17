@@ -14,8 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NextBites",
-  description: "Find your next favourite recipe.",
+  title: {
+    default: "NextBites · Find your next favourite recipe",
+    template: "%s · NextBites",
+  },
+  description:
+    "NextBites is a hand-picked collection of recipes from around the world. Search by dish or cuisine and get step-by-step instructions for each one.",
+  applicationName: "NextBites",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
