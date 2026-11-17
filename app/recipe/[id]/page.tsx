@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { getRecipe, recipes } from "../../data/recipes";
 import styles from "./page.module.css";
 
+// Only the ids from generateStaticParams exist; any other id renders not-found.tsx.
+// Required for output: "export", where pages can't be generated on demand.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return recipes.map((recipe) => ({ id: recipe.id }));
 }
