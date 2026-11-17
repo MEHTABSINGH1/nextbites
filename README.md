@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextBites
 
-## Getting Started
+A recipe browsing app built with **Next.js 16 (App Router) + TypeScript**.
+This is Part 1 of 3: project scaffold plus a styled home page that lists recipes in a responsive grid.
 
-First, run the development server:
+Repository (public): https://github.com/MEHTABSINGH1/nextbites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Project structure
+
+```
+nextbites/
+├── tsconfig.json              # TypeScript config (strict mode)
+├── next.config.ts
+├── package.json
+└── app/
+    ├── layout.tsx             # Root layout: shared <NavBar /> above {children}
+    ├── page.tsx               # Home page: maps recipes into <RecipeCard />s
+    ├── page.module.css        # Responsive grid: repeat(auto-fill, minmax(230px, 1fr))
+    ├── globals.css
+    ├── data/
+    │   └── recipes.ts         # `Recipe` type + `recipes: Recipe[]` (6 recipes)
+    └── components/
+        ├── NavBar.tsx         # Shared navigation bar
+        └── RecipeCard.tsx     # Typed card: ({ recipe }: { recipe: Recipe })
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Single data source**: `app/data/recipes.ts` exports the `Recipe` type and the `recipes` array.
+- **Typed, reusable card**: `RecipeCard` takes one `recipe` prop typed as `Recipe` (no `any`) and is used for every card.
+- **Home page**: `app/page.tsx` does `recipes.map((recipe) => <RecipeCard key={recipe.id} recipe={recipe} />)` inside a CSS grid that reflows across screen sizes.
+- **Shared layout**: `app/layout.tsx` renders `<NavBar />` and then `{children}`, so the nav shows on every page.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Getting started
 
-## Learn More
+```bash
+npm install
+npm run dev      # http://localhost:3000
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Verification
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Check | Command | Result |
+| --- | --- | --- |
+| Type check | `npx tsc --noEmit` | ✅ no errors |
+| Lint | `npm run lint` | ✅ no warnings or errors |
+| Production build | `npm run build` | ✅ compiled successfully |
+| Dev server | `npm run dev` | ✅ home page renders with no error overlay |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Build output:
 
-## Deploy on Vercel
+```
+Route (app)
+┌ ○ /
+└ ○ /_not-found
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+○  (Static)  prerendered as static content
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Roadmap
+
+- **Part 2**: search and individual recipe pages
+- **Part 3**: deploy live
